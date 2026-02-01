@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Be My Valentine?</title>
+  <style>
+    :root {
+      --bg1: #ffe6ef;
+      --bg2: #fff7fb;
+      --card: rgba(255,255,255,0.75);
+      --text: #1f1f1f;
+      --accent: #ff3b7a;
+      --accent2: #ff7aa7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 20% 20%, var(--bg2), var(--bg1));
+      overflow: hidden;
+    }
+
+    .card {
+      width: min(520px, 92vw);
+      padding: 28px 22px;
+      border-radius: 22px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.12);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 3.6vw, 34px);
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0 0 18px;
+      opacity: 0.75;
+      font-size: 15px;
+    }
+
+    .buttons {
+      margin-top: 14px;
+      height: 120px; /* space for the runaway button */
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform .15s ease, filter .15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      position: absolute;
+      min-width: 120px;
+    }
+
+    #yesBtn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      left: 50%;
+      top: 50%;
+      transform: translate(-105%, -50%);
+      box-shadow: 0 12px 30px rgba(255, 59, 122, 0.35);
+    }
+    #yesBtn:active { transform: translate(-105%, -50%) scale(0.98); }
+
+    #noBtn {
+      background: #fff;
+      color: #333;
+      left: 50%;
+      top: 50%;
+      transform: translate(5%, -50%);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+    }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .result {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .hearts {
+      position: absolute;
+      inset: -40px;
+      pointer-events: none;
+      opacity: 0.55;
+      filter: blur(0.2px);
+    }
+
+    /* floating hearts */
+    .heart {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      border-radius: 4px;
+      animation: floatUp linear infinite;
+      opacity: 0.35;
+    }
+    .heart::before, .heart::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .heart::before { left: -8px; top: 0; }
+    .heart::after { left: 0; top: -8px; }
+
+    @keyframes floatUp {
+      from { transform: translateY(0) rotate(45deg); }
+      to   { transform: translateY(-820px) rotate(45deg); }
+    }
+
+    /* small screen tweaks */
+    @media (max-width: 380px) {
+      button { font-size: 16px; min-width: 110px; }
+      .buttons { height: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hearts" id="hearts"></div>
+
+    <h1 id="title">Will you be my Valentine? 💘</h1>
+    <p id="subtitle">Choose wisely 😌</p>
+
+    <div class="buttons" id="arena">
+      <button id="yesBtn">Yes 💖</button>
+      <button id="noBtn">No 🙃</button>
+    </div>
+
+    <div class="result" id="result">YAYYYYY!! 💞💞💞</div>
+    <div class="footer">Tip: try tapping “No” 😏</div>
+  </div>
+
+  <!-- Confetti (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <script>
+    // --- Customize text here ---
+    // Example: "Arpit ❤️ Manya" or "Will you be my Valentine, [Name]?"
+    // document.getElementById("title").textContent = "Will you be my Valentine, Manya? 💘";
+    // document.getElementById("subtitle").textContent = "I promise snacks + movies 😄";
+
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const arena = document.getElementById("arena");
+    const result = document.getElementById("result");
+
+    // Create subtle floating hearts
+    const heartsWrap = document.getElementById("hearts");
+    for (let i = 0; i < 18; i++) {
+      const h = document.createElement("div");
+      h.className = "heart";
+      const left = Math.random() * 100;
+      const duration = 6 + Math.random() * 7;
+      const delay = Math.random() * 6;
+      const size = 10 + Math.random() * 14;
+      h.style.left = left + "%";
+      h.style.bottom = (-20 - Math.random() * 200) + "px";
+      h.style.width = size + "px";
+      h.style.height = size + "px";
+      h.style.animationDuration = duration + "s";
+      h.style.animationDelay = delay + "s";
+      h.style.opacity = (0.15 + Math.random() * 0.25).toFixed(2);
+      heartsWrap.appendChild(h);
+    }
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function moveNoButton() {
+      // Move within the arena bounds
+      const rect = arena.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = rect.width - btnRect.width;
+      const maxY = rect.height - btnRect.height;
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.transform = "none";
+    }
+
+    // Initial positioning for "No" (absolute within arena)
+    // Convert from 50% layout to pixel layout once, for smoother moves
+    function initNoBtnPixelPos() {
+      const rect = arena.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      // Start near right side, centered vertically
+      const x = clamp(rect.width * 0.62, 0, rect.width - btnRect.width);
+      const y = clamp(rect.height * 0.5 - btnRect.height * 0.5, 0, rect.height - btnRect.height);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.transform = "none";
+    }
+
+    // Run away on hover (desktop) and on touchstart (mobile)
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // prevents click triggering
+      moveNoButton();
+    }, { passive: false });
+
+    // If someone still manages to click No (rare), move it again
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    yesBtn.addEventListener("click", () => {
+      result.style.display = "block";
+
+      // Confetti burst
+      const end = Date.now() + 1200;
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          spread: 70,
+          origin: { y: 0.65 }
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+
+      // Optional: make "No" disappear after Yes
+      noBtn.style.display = "none";
+      yesBtn.style.transform = "translate(-50%, -50%) scale(1.02)";
+      yesBtn.style.left = "50%";
+      yesBtn.style.top = "50%";
+    });
+
+    // On load / resize, initialize pixel position
+    window.addEventListener("load", initNoBtnPixelPos);
+    window.addEventListener("resize", initNoBtnPixelPos);
+  </script>
+</body>
+</html>
